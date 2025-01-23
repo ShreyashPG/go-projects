@@ -19,7 +19,7 @@ func formHandler(w http.ResponseWriter , r *http.Request){
 	name := r.FormValue("name");
 	address :=r.FormValue("address");
 	age :=r.FormValue("age");
-	fmt.Fprintf(w, "Nmae = %s\n", name);
+	fmt.Fprintf(w, "Name = %s\n", name);
 	fmt.Fprintf(w, "Address = %s\n",address);
 	fmt.Fprintf(w, "Age = %s\n",age);
 
