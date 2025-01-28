@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shreyash Book Store</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+        input, button, select {
+            margin-bottom: 10px;
+            padding: 5px;
+            width: 100%;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome to Shreyash Book Store</h1>
+
+    <section id="add-book">
+        <h2>Add a New Book</h2>
+        <form id="addBookForm">
+            <label for="add-name">Name:</label>
+            <input type="text" id="add-name" name="name" required>
+            <label for="add-author">Author:</label>
+            <input type="text" id="add-author" name="author" required>
+            <label for="add-publication">Publication:</label>
+            <input type="text" id="add-publication" name="publication" required>
+            <button type="submit">Add Book</button>
+        </form>
+    </section>
+
+    <section id="get-books">
+        <h2>All Books</h2>
+        <button onclick="fetchBooks()">Get All Books</button>
+        <table id="booksTable">
+            <thead>
+                <tr>
+                    <th>Book ID</th>
+                    <th>Name</th>
+                    <th>Author</th>
+                    <th>Publication</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Books will be dynamically added here -->
+            </tbody>
+        </table>
+    </section>
+
+    <section id="update-book">
+        <h2>Update a Book</h2>
+        <form id="updateBookForm">
+            <label for="update-id">Book ID:</label>
+            <input type="text" id="update-id" name="id" required>
+            <label for="update-name">Name:</label>
+            <input type="text" id="update-name" name="name" required>
+            <label for="update-author">Author:</label>
+            <input type="text" id="update-author" name="author" required>
+            <label for="update-publication">Publication:</label>
+            <input type="text" id="update-publication" name="publication" required>
+            <button type="submit">Update Book</button>
+        </form>
+    </section>
+
+    <section id="delete-book">
+        <h2>Delete a Book</h2>
+        <form id="deleteBookForm">
+            <label for="delete-id">Book ID:</label>
+            <input type="text" id="delete-id" name="id" required>
+            <button type="submit">Delete Book</button>
+        </form>
+    </section>
+
+    <script>
+        const apiUrl = 'http://localhost:8080/books';
+
+        // Add a new book
+        document.getElementById('addBookForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const name = document.getElementById('add-name').value;
+            const author = document.getElementById('add-author').value;
+            const publication = document.getElementById('add-publication').value;
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, author, publication })
+            });
+            if (response.ok) {
+                alert('Book added successfully!');
+                document.getElementById('addBookForm').reset();
+                fetchBooks();
+            } else {
+                alert('Error adding book');
+            }
+        });
+
+        // Fetch all books
+        async function fetchBooks() {
+            const response = await fetch(apiUrl);
+            const books = await response.json();
+
+            const tableBody = document.querySelector('#booksTable tbody');
+            tableBody.innerHTML = ''; // Clear existing rows
+
+            books.forEach(book => {
+                const row = `<tr>
+                    <td>${book.ID}</td>
+                    <td>${book.name}</td>
+                    <td>${book.author}</td>
+                    <td>${book.publication}</td>
+                </tr>`;
+                tableBody.innerHTML += row;
+            });
+        }
+
+        // Update a book
+        document.getElementById('updateBookForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const id = document.getElementById('update-id').value;
+            const name = document.getElementById('update-name').value;
+            const author = document.getElementById('update-author').value;
+            const publication = document.getElementById('update-publication').value;
+
+            const response = await fetch(`${apiUrl}/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, author, publication })
+            });
+            if (response.ok) {
+                alert('Book updated successfully!');
+                document.getElementById('updateBookForm').reset();
+                fetchBooks();
+            } else {
+                alert('Error updating book');
+            }
+        });
+
+        // Delete a book
+        document.getElementById('deleteBookForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const id = document.getElementById('delete-id').value;
+
+            const response = await fetch(`${apiUrl}/${id}`, {
+                method: 'DELETE'
+            });
+            if (response.ok) {
+                alert('Book deleted successfully!');
+                document.getElementById('deleteBookForm').reset();
+                fetchBooks();
+            } else {
+                alert('Error deleting book');
+            }
+        });
+    </script>
+</body>
+</html>
