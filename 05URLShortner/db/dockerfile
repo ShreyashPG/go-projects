@@ -1,0 +1,3 @@
+FROM redis:alpinr
+
+EXPOSE 6379
