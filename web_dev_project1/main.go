@@ -34,19 +34,50 @@ func main() {
 		return c.JSON(employees)
 	})
 
-	app.Post("/add-employee", func(c *fiber.Ctx) error {
-		employee:= new(Employee)
-		if err := c.BodyParser(employee); err != nil {
-			return c.Status(400).SendString(err.Error())
+	app.Get("/employees/:id", func(c *fiber.Ctx) error {
+		idStr := c.Params("id")
+		id, err := strconv.Atoi(idStr) // Convert ID to integer
+		if err != nil {
+			return c.Status(400).JSON(fiber.Map{
+				"error": "Invalid employee ID",
+			})
 		}
-		employee.ID = len(employees)+1
-		
-		employees=append(employees,*employee)
-		return  c.Status(201).JSON(fiber.Map{
-			"message": "Employee added successfully",
+	
+		for _, emp := range employees { // Loop through employees slice
+			if emp.ID == id {
+				return c.JSON(emp) // Return employee if found
+			}
+		}
+	
+		return c.Status(404).JSON(fiber.Map{
+			"error": "Employee not found",
+		})
+	})
+	
+
+	app.Post("/add-employee", func(c *fiber.Ctx) error {
+		employee := new(Employee)
+	
+		// Parse request body
+		if err := c.BodyParser(employee); err != nil {
+			return c.Status(400).JSON(fiber.Map{"error": "Invalid request body"})
+		}
+	
+		// Validate required fields
+		if employee.Name == "" || employee.Email == "" || employee.Position == "" || employee.Age == 0 {
+			return c.Status(400).JSON(fiber.Map{"error": "All fields are required"})
+		}
+	
+		// Assign an ID and append to the list
+		employee.ID = len(employees) + 1
+		employees = append(employees, *employee)
+	
+		return c.Status(201).JSON(fiber.Map{
+			"message":  "Employee added successfully",
 			"employee": employee,
 		})
 	})
+	
 
 	app.Put("/update-employee/:id", func(c *fiber.Ctx) error{
 		idStr :=c.Params("id")
@@ -62,6 +93,7 @@ func main() {
 		}
 		for i, emp := range employees{
 			if emp.ID == id {
+				employee.ID = id
 				employees[i] = *employee
 				return c.JSON(fiber.Map{
 					"message": "Employee updated successfully",
@@ -88,16 +120,13 @@ func main() {
 		}
 		return c.Status(404).SendString("Employee not found")
 	})
+	
 
 	app.Get("/", func(c *fiber.Ctx) error{
 		return c.SendString("Hello, World!")
 	})
 	app.Post("/hello-world", func(c *fiber.Ctx) error {
 		greet := c.FormValue("greet")
-			// if greet == "" {
-			// 	greet = "Hello, World!"
-			// }
-
 		return c.JSON(fiber.Map{
 			"message": greet,
 		})
